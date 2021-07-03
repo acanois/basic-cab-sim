@@ -11,6 +11,26 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 
+class MainPanel : public juce::Component,
+juce::Slider::Listener
+{
+public:
+    MainPanel(BasicAmpSimAudioProcessor& processor);
+    
+    void resized() override;
+    void paint(juce::Graphics& g) override;
+    void sliderValueChanged (juce::Slider* slider) override;
+    
+    int getComponentHeight() { return mComponentBounds.getHeight(); }
+    
+private:
+    juce::OwnedArray<juce::Slider> mGainControls;
+    juce::OwnedArray<juce::AudioProcessorValueTreeState::SliderAttachment> mDistAttachments;
+    
+    juce::Rectangle<int> mComponentBounds;
+    juce::Rectangle<int> sliderBounds;
+};
+
 //==============================================================================
 /**
 */
@@ -25,6 +45,12 @@ public:
     void resized() override;
 
 private:
+    juce::OwnedArray<juce::Slider> mGainControls;
+    juce::OwnedArray<juce::AudioProcessorValueTreeState::SliderAttachment> mDistAttachments;
+    
+    juce::Rectangle<int> mComponentBounds;
+    juce::Rectangle<int> sliderBounds;
+    
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     BasicAmpSimAudioProcessor& audioProcessor;

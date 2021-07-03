@@ -22,8 +22,8 @@ BasicAmpSimAudioProcessor::BasicAmpSimAudioProcessor()
                        ),
 #endif
 mValueTree(*this, nullptr, "ValueTree", {
-    std::make_unique<juce::AudioParameterFloat> ("input", "Input", juce::NormalisableRange<float>   (0.f, 0.99f, 0.001f), mInput.get()),
-    std::make_unique<juce::AudioParameterFloat> ("output", "Output", juce::NormalisableRange<float> (0.f, 1.f, 0.001f), mOutput.get())
+    std::make_unique<juce::AudioParameterFloat> ("input", "Input", juce::NormalisableRange<float>   (0.f, 2.f, 0.001f), mInput.get()),
+    std::make_unique<juce::AudioParameterFloat> ("output", "Output", juce::NormalisableRange<float> (0.f, 2.f, 0.001f), mOutput.get())
 })
 {
     mValueTree.addParameterListener("input", this);
@@ -179,20 +179,33 @@ juce::AudioProcessorEditor* BasicAmpSimAudioProcessor::createEditor()
 //==============================================================================
 void BasicAmpSimAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    // For saving parameter state
+    auto state = mValueTree.copyState();
+    std::unique_ptr<juce::XmlElement> xml (state.createXml());
+    copyXmlToBinary(*xml, destData);
 }
 
 void BasicAmpSimAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    // Also for saving parameter state
+    std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+    if (xmlState.get() != nullptr)
+        if (xmlState->hasTagName (mValueTree.state.getType()))
+            mValueTree.replaceState (juce::ValueTree::fromXml (*xmlState));
 }
 
 void BasicAmpSimAudioProcessor::parameterChanged (const juce::String& parameterID, float newValue)
 {
-    
+    if (parameterID == "input") {
+        mInput.set(newValue);
+        auto& preGain = processorChain.template get<preGainIndex>();
+        preGain.setGainLinear(mInput.get());
+    }
+    if (parameterID == "output") {
+        mOutput.set (newValue);
+        auto& postGain = processorChain.template get<postGainIndex>();
+        postGain.setGainLinear(mOutput.get());
+    }
 }
 
 //==============================================================================

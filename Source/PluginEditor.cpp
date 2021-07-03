@@ -13,8 +13,22 @@
 BasicAmpSimAudioProcessorEditor::BasicAmpSimAudioProcessorEditor (BasicAmpSimAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
+    std::array<std::string, 2> controlNames = { "input", "output" };
+
+    for (auto name : controlNames)
+    {
+        auto* slider = new juce::Slider(name);
+        auto* sliderAttachment = new juce::AudioProcessorValueTreeState::SliderAttachment(p.getValueTreeState(), name, *slider);
+        slider->setSliderStyle(juce::Slider::RotaryVerticalDrag);
+        slider->setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 25);
+        mGainControls.add(slider);
+        mDistAttachments.add(sliderAttachment);
+        addAndMakeVisible(slider);
+    }
+    
+    sliderBounds.setBounds(0, 100, 100, 100);
+    mComponentBounds.setBounds(100, 100, (sliderBounds.getWidth() * 4), (sliderBounds.getHeight()));
+    
     setSize (400, 300);
 }
 
@@ -35,6 +49,9 @@ void BasicAmpSimAudioProcessorEditor::paint (juce::Graphics& g)
 
 void BasicAmpSimAudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
+    int xPos = mComponentBounds.getX() / 2;
+    for (juce::Slider* control : mGainControls) {
+        control->setBounds(xPos, mComponentBounds.getY(), sliderBounds.getWidth(), sliderBounds.getHeight());
+        xPos += (sliderBounds.getX() + sliderBounds.getWidth() + 100);
+    }
 }

@@ -63,7 +63,7 @@ public:
 private:
     //==============================================================================
     juce::Atomic<float> mInput  { 0.f };
-    juce::Atomic<float> mOutput { 0.5f };
+    juce::Atomic<float> mOutput { 0.f };
     
     // Initialize everything below after the atomic parameters
     juce::dsp::ProcessorChain<juce::dsp::Gain<float>, juce::dsp::Convolution, juce::dsp::Gain<float>> processorChain;
