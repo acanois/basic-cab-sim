@@ -19,18 +19,26 @@ BasicAmpSimAudioProcessor::BasicAmpSimAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),
 #endif
+mValueTree(*this, nullptr, "ValueTree", {
+    std::make_unique<juce::AudioParameterFloat> ("input", "Input", juce::NormalisableRange<float>   (0.f, 0.99f, 0.001f), mInput.get()),
+    std::make_unique<juce::AudioParameterFloat> ("output", "Output", juce::NormalisableRange<float> (0.f, 1.f, 0.001f), mOutput.get())
+})
 {
+    mValueTree.addParameterListener("input", this);
+    mValueTree.addParameterListener("output", this);
+    
     auto dir = juce::File::getCurrentWorkingDirectory();
     
     auto& convolution = processorChain.template get<convolutionIndex>();
     convolution.loadImpulseResponse(
-            juce::File ("/Users/acanois/prog/audio/juce_projects/BasicAmpSim/Resources/guitar_amp.wav"),
+            juce::File ("/Users/acanois/prog/audio/juce_projects/BasicAmpSim/Resources/celestion_g12h_75_creamback_1x12_heavy_mix.wav"),
             juce::dsp::Convolution::Stereo::yes,
             juce::dsp::Convolution::Trim::no,
             1024
-    );}
+    );
+}
 
 BasicAmpSimAudioProcessor::~BasicAmpSimAudioProcessor()
 {
@@ -109,7 +117,7 @@ void BasicAmpSimAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     auto& preGain = processorChain.template get<preGainIndex>();
     auto& postGain = processorChain.template get<postGainIndex>();
     
-    preGain.setGainLinear(0.5f);
+    preGain.setGainLinear(1.f);
     postGain.setGainLinear(1.f);
     
     processorChain.prepare(spec);
@@ -180,6 +188,11 @@ void BasicAmpSimAudioProcessor::setStateInformation (const void* data, int sizeI
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+}
+
+void BasicAmpSimAudioProcessor::parameterChanged (const juce::String& parameterID, float newValue)
+{
+    
 }
 
 //==============================================================================

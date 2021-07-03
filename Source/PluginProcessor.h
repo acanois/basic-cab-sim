@@ -13,7 +13,8 @@
 //==============================================================================
 /**
 */
-class BasicAmpSimAudioProcessor  : public juce::AudioProcessor
+class BasicAmpSimAudioProcessor  : public juce::AudioProcessor,
+                                   public juce::AudioProcessorValueTreeState::Listener
 {
 public:
     //==============================================================================
@@ -53,12 +54,21 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
     
+    //==============================================================================
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
+    
+    juce::AudioProcessorValueTreeState& getValueTreeState() { return mValueTree; }
     
 
 private:
     //==============================================================================
-    std::unique_ptr<juce::dsp::Convolution> convolution;
+    juce::Atomic<float> mInput  { 0.f };
+    juce::Atomic<float> mOutput { 0.5f };
+    
+    // Initialize everything below after the atomic parameters
     juce::dsp::ProcessorChain<juce::dsp::Gain<float>, juce::dsp::Convolution, juce::dsp::Gain<float>> processorChain;
+    
+    juce::AudioProcessorValueTreeState mValueTree;
     
     enum
     {
