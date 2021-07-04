@@ -33,7 +33,7 @@ mValueTree(*this, nullptr, "ValueTree", {
     
     auto& convolution = processorChain.template get<convolutionIndex>();
     convolution.loadImpulseResponse(
-            juce::File ("/Users/acanois/prog/audio/juce_projects/BasicAmpSim/Resources/celestion_g12h_75_creamback_1x12_heavy_mix.wav"),
+            juce::File (dir.getParentDirectory().getChildFile("Resources").getChildFile("celestion_g12h_75_creamback_1x12_heavy_mix")),
             juce::dsp::Convolution::Stereo::yes,
             juce::dsp::Convolution::Trim::no,
             1024
