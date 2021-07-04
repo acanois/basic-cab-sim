@@ -29,11 +29,18 @@ mValueTree(*this, nullptr, "ValueTree", {
     mValueTree.addParameterListener("input", this);
     mValueTree.addParameterListener("output", this);
     
-    auto dir = juce::File::getCurrentWorkingDirectory();
+    // This is ridiculous. I realize that.
+    auto dir = juce::File::getSpecialLocation (juce::File::currentApplicationFile)
+        .getParentDirectory()
+        .getParentDirectory()
+        .getParentDirectory()
+        .getParentDirectory()
+        .getParentDirectory()
+        .getChildFile("Resources");
     
     auto& convolution = processorChain.template get<convolutionIndex>();
     convolution.loadImpulseResponse(
-            juce::File (dir.getParentDirectory().getChildFile("Resources").getChildFile("celestion_g12h_75_creamback_1x12_heavy_mix")),
+            dir.getChildFile("celestion_g12h_75_creamback_1x12_heavy_mix.wav"),
             juce::dsp::Convolution::Stereo::yes,
             juce::dsp::Convolution::Trim::no,
             1024
